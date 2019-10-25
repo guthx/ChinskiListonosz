@@ -8,65 +8,72 @@ namespace ChinskiListonosz
     class Graph
     {
         private static string Filename;
+        // Specifies number of edges in the graph
         public int NumOfEdges;
+        // Specifies number of vertices in the graph
         public int NumOfVertices;
+        // Specifies number of vertices of odd degrees in the graph
         public int NumOfOddVertices;
+        // Contains raw data read from given file
         public int[,] Data;
+        // Contains association matrix for the graph
+        // AssocMatrix[i, j] specifies the length of the path between vertices i and j, assuming the path exists (otherwise it's 0)
         public int[,] AssocMatrix;
+        // Contains degrees of each vertex of the graph, i.e. Degrees[i] is the degree of vertex i
         public int[] Degrees;
+        // Contains a matrix that specifies the path and it's cost between each pair of odd vertices
         public Path[,] PathMatrix;
+        // Contains a list of all vertices of odd degrees
         public List<int> OddVertices;
         
+        // Function loads data from given file and puts it into the Data array
         private void LoadData()
         {
-
-        }
-
-        public Graph(string name)
-        {
-            Filename = name;
-            OddVertices = new List<int>();
-            // Otworzenie pliku z danymi, inicjalizacja tablicy
             var reader = new StreamReader(@Filename);
             var lineCount = File.ReadLines(@Filename).Count();
             int i = 0;
             Data = new int[lineCount, 3];
             NumOfEdges = lineCount;
-
-            // Wypełnienie tablicy z krawędziami danymi z pliku
             while (!reader.EndOfStream)
             {
                 var line = reader.ReadLine();
-                var values = line.Split(' ');             
+                var values = line.Split(' ');
                 int k;
-                for(k=0; k<values.Length; k++)
+                for (k = 0; k < values.Length; k++)
                 {
                     Data[i, k] = int.Parse(values[k]);
-                }               
+                }
                 i++;
             }
+        }
 
-            int max=0;
-            // Sprawdzenie ilości wierzchołków
-            for (i=0; i<NumOfEdges; i++)
+        // Function calculates degrees of each vertex and puts them into Degrees array
+        private void CalculateDegrees()
+        {
+            int max = 0;
+            for (i = 0; i < NumOfEdges; i++)
             {
-                if (Data[i,0] > max)
-                    max = Data[i,0];
-                if (Data[i,1] > max)
-                    max = Data[i,1];
+                if (Data[i, 0] > max)
+                    max = Data[i, 0];
+                if (Data[i, 1] > max)
+                    max = Data[i, 1];
             }
             NumOfVertices = max;
             Degrees = new int[NumOfVertices + 1];
-            for(i=0; i<NumOfEdges; i++)
+            for (i = 0; i < NumOfEdges; i++)
             {
                 int v1 = Data[i, 0];
                 int v2 = Data[i, 1];
                 Degrees[v1]++;
                 Degrees[v2]++;
             }
+        }
 
+        // Function creates the association matrix and saves it in AssocMatrix array
+        private void FillAssocMatrix()
+        {
             AssocMatrix = new int[NumOfVertices + 1, NumOfVertices + 1];
-            for(i=0; i<NumOfEdges; i++)
+            for (i = 0; i < NumOfEdges; i++)
             {
                 int start = Data[i, 0];
                 int end = Data[i, 1];
@@ -74,7 +81,12 @@ namespace ChinskiListonosz
                 AssocMatrix[start, end] = weight;
                 AssocMatrix[end, start] = weight;
             }
+        }
 
+        // Function finds all vertices of odd degrees and puts them into OddVertices list
+        private void FindOddVertices()
+        {
+            OddVertices = new List<int>();
             for (i = 1; i < NumOfVertices + 1; i++)
             {
                 if (Degrees[i] % 2 == 1)
@@ -83,9 +95,13 @@ namespace ChinskiListonosz
                 }
             }
             NumOfOddVertices = OddVertices.Count();
+        }
+        
+        // Function creates the Path matrix using Dijskstra's algorithm and puts it into PathMatrix array
+        private void CreatePathMatrix()
+        {
             PathMatrix = new Path[NumOfOddVertices + 1, NumOfOddVertices + 1];
 
-            // algorytm Djikstry - znalezienie najkrotszej drogi dla kazdej z par wierzcholkow nieparzystych
             OddVertices.ForEach(source =>
             {
                 int[] dist = new int[NumOfVertices + 1];
@@ -142,12 +158,17 @@ namespace ChinskiListonosz
 
                 });
             });
-            
+        }
 
-            
-
-
-            
+        public Graph(string name)
+        {
+            Filename = name;
+           
+            LoadData();
+            CalculateDegrees();
+            FillAssocMatrix();
+            FindOddVertices();
+            CreatePathMatrix();                         
         }
 
     }
