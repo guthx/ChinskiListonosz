@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 namespace ChinskiListonosz
 {
-    class Graph
+    public class Graph
     {
         private static string Filename;
         // Specifies number of edges in the graph
