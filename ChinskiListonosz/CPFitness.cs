@@ -25,7 +25,7 @@ namespace ChinskiListonosz
                 graphAug += pathLength;
             }
 
-            return graphAug;
+            return -graphAug;
             
         }
     }
