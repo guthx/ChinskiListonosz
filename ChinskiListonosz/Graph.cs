@@ -51,7 +51,7 @@ namespace ChinskiListonosz
         private void CalculateDegrees()
         {
             int max = 0;
-            for (i = 0; i < NumOfEdges; i++)
+            for (var i = 0; i < NumOfEdges; i++)
             {
                 if (Data[i, 0] > max)
                     max = Data[i, 0];
@@ -60,7 +60,7 @@ namespace ChinskiListonosz
             }
             NumOfVertices = max;
             Degrees = new int[NumOfVertices + 1];
-            for (i = 0; i < NumOfEdges; i++)
+            for (var i = 0; i < NumOfEdges; i++)
             {
                 int v1 = Data[i, 0];
                 int v2 = Data[i, 1];
@@ -73,7 +73,7 @@ namespace ChinskiListonosz
         private void FillAssocMatrix()
         {
             AssocMatrix = new int[NumOfVertices + 1, NumOfVertices + 1];
-            for (i = 0; i < NumOfEdges; i++)
+            for (var i = 0; i < NumOfEdges; i++)
             {
                 int start = Data[i, 0];
                 int end = Data[i, 1];
@@ -87,7 +87,7 @@ namespace ChinskiListonosz
         private void FindOddVertices()
         {
             OddVertices = new List<int>();
-            for (i = 1; i < NumOfVertices + 1; i++)
+            for (var i = 1; i < NumOfVertices + 1; i++)
             {
                 if (Degrees[i] % 2 == 1)
                 {
@@ -107,7 +107,7 @@ namespace ChinskiListonosz
                 int[] dist = new int[NumOfVertices + 1];
                 int[] prev = new int[NumOfVertices + 1];
                 List<int> Q = new List<int>();
-                for (i = 1; i < NumOfVertices + 1; i++)
+                for (var i = 1; i < NumOfVertices + 1; i++)
                 {
                     dist[i] = int.MaxValue;
                     prev[i] = -1;

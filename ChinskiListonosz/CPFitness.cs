@@ -13,7 +13,7 @@ namespace ChinskiListonosz
             var ic = chromosome as FloatingPointChromosome;
             var floatValues = ic.ToFloatingPoints();
             int[] values = new int[floatValues.Length];
-            
+            return 0;
             
         }
     }
