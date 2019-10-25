@@ -18,8 +18,8 @@ namespace ChinskiListonosz
     {
         static void Main(string[] args)
         {
-            /*
-            Globals.graph = new Graph("Data/data.txt");
+            
+            Globals.graph = new GraphNew("Data/data.txt");
             int[] startValues = new int[Globals.graph.NumOfOddVertices];
             startValues = Globals.graph.OddVertices.ToArray();
 
@@ -41,26 +41,10 @@ namespace ChinskiListonosz
             var bestChromosome = ga.BestChromosome as CPChromosome;
             var phenotype = bestChromosome.GetValues();
             var lowestAug = bestChromosome.Fitness.GetValueOrDefault();
-
-            var augmentedGraph = Globals.graph.CopyGraph();
-            augmentedGraph.AddEdgesToGraph(new int[] { 2, 3, 4, 5 });
-            var path = augmentedGraph.FindEulerianPath(2);
-            var realPath = Globals.graph.FindShortestPath(path);
-            realPath.ForEach(v => Console.Write(v-1));
-            int cost = 0;
-            var realPathArray = realPath.ToArray();
-            for(var i=0; i<realPathArray.Length-1; i++)
-            {
-                cost += Globals.graph.AssocMatrix[realPathArray[i], realPathArray[i+1]];
-            }
-            Console.WriteLine("\n");
-            Console.WriteLine(cost);
-
-          //  Console.WriteLine(realPathString);
-            */
+            
             var test = new GraphNew("Data/data.txt");
-            test.AddEdgesToGraph(new int[] { 2, 3, 4, 5 });
-            var eulerianPath = test.FindEulerianPath(2);
+            test.AddEdgesToGraph(phenotype);
+            var eulerianPath = test.FindEulerianPath(1);
             var shortestPath = test.FindShortesPath(eulerianPath);
             var pathLength = test.GetPathLength(shortestPath);
             Console.WriteLine(test.PathToString(shortestPath));
