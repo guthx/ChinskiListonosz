@@ -25,6 +25,20 @@ namespace ChinskiListonosz
         public Path[,] PathMatrix;
         // Contains a list of all vertices of odd degrees
         public List<int> OddVertices;
+
+        public Graph(string name)
+        {
+            Filename = name;
+
+            LoadData();
+            FillAssocMatrix();
+            Degrees = new int[NumOfVertices + 1];
+            CalculateDegrees();
+            FindOddVertices();
+            CreatePathMatrix();
+        }
+
+        public Graph() { }
         
         // Function loads data from given file and puts it into the Data array
         private void LoadData()
@@ -50,6 +64,33 @@ namespace ChinskiListonosz
         // Function calculates degrees of each vertex and puts them into Degrees array
         private void CalculateDegrees()
         {
+            /*
+            Degrees = new int[NumOfVertices + 1];
+            for (var i = 0; i < NumOfEdges; i++)
+            {
+                int v1 = Data[i, 0];
+                int v2 = Data[i, 1];
+                Degrees[v1]++;
+                Degrees[v2]++;
+            }
+            */
+            Degrees = Degrees.ToList().Select(v => 0).ToArray();
+            for(var i=1; i < NumOfVertices+1; i++)
+                for(var j=i+1; j<NumOfVertices+1; j++)
+                {
+                    if(AssocMatrix[i, j] != 0)
+                    {
+                        Degrees[i]++;
+                        Degrees[j]++;
+                    }
+                    
+                }
+
+        }
+
+        // Function creates the association matrix and saves it in AssocMatrix array
+        private void FillAssocMatrix()
+        {
             int max = 0;
             for (var i = 0; i < NumOfEdges; i++)
             {
@@ -59,19 +100,6 @@ namespace ChinskiListonosz
                     max = Data[i, 1];
             }
             NumOfVertices = max;
-            Degrees = new int[NumOfVertices + 1];
-            for (var i = 0; i < NumOfEdges; i++)
-            {
-                int v1 = Data[i, 0];
-                int v2 = Data[i, 1];
-                Degrees[v1]++;
-                Degrees[v2]++;
-            }
-        }
-
-        // Function creates the association matrix and saves it in AssocMatrix array
-        private void FillAssocMatrix()
-        {
             AssocMatrix = new int[NumOfVertices + 1, NumOfVertices + 1];
             for (var i = 0; i < NumOfEdges; i++)
             {
@@ -100,7 +128,7 @@ namespace ChinskiListonosz
         // Function creates the Path matrix using Dijskstra's algorithm and puts it into PathMatrix array
         private void CreatePathMatrix()
         {
-            PathMatrix = new Path[NumOfOddVertices + 1, NumOfOddVertices + 1];
+            PathMatrix = new Path[NumOfVertices + 1, NumOfVertices + 1];
 
             OddVertices.ForEach(source =>
             {
@@ -152,7 +180,6 @@ namespace ChinskiListonosz
                             target = prev[target];
                         }
                         var path = new Path(distance, vertices);
-                        PathMatrix[source, start] = path;
                         PathMatrix[start, source] = path;
                     }
 
@@ -160,16 +187,98 @@ namespace ChinskiListonosz
             });
         }
 
-        public Graph(string name)
+        public void AddEdgesToGraph(int[] vertices)
         {
-            Filename = name;
-           
-            LoadData();
+            for(var i = 0; i<vertices.Length; i+=2)
+            {
+                int v1 = vertices[i];
+                int v2 = vertices[i + 1];
+                AssocMatrix[v1, v2] = PathMatrix[v1, v2].Distance;
+                AssocMatrix[v2, v1] = PathMatrix[v1, v2].Distance;
+            }
             CalculateDegrees();
-            FillAssocMatrix();
-            FindOddVertices();
-            CreatePathMatrix();                         
         }
 
+        private bool IsGraphEulerian()
+        {
+            for (var i = 1; i < NumOfVertices + 1; i++)
+                if (Degrees[i] % 2 != 0)
+                    return false;
+
+            return true;
+        }
+
+        public List<int> FindEulerianPath(int startingVertex)
+        {
+            if (!IsGraphEulerian())
+                throw new Exception("Graf nie jest eulerowski");
+            var stack = new Stack<int>();
+            var path = new List<int>();
+            int currentVertex = startingVertex;
+            int[] degrees = (int[])Degrees.Clone();
+            int[,] assocMatrix = (int[,])AssocMatrix.Clone();
+
+            while(stack.Count > 0 || degrees[currentVertex] > 0)
+            {
+                if(degrees[currentVertex] == 0)
+                {
+                    path.Add(currentVertex);
+                    currentVertex = stack.Pop();
+                } else
+                {
+                    stack.Push(currentVertex);
+                    for(var i=1; i<NumOfVertices+1; i++)
+                    {
+                        if(assocMatrix[i, currentVertex] != 0)
+                        {
+                            assocMatrix[i, currentVertex] = 0;
+                            assocMatrix[currentVertex, i] = 0;
+                            degrees[i]--;
+                            degrees[currentVertex]--;
+                            currentVertex = i;
+                            break;
+                        }
+                    }
+                }
+            }
+            path.Add(startingVertex);
+          //  path.Reverse();
+            return path;
+        }
+
+        public List<int> FindShortestPath(List<int> eulerianPath)
+        {
+            var path = new List<int>();
+
+            eulerianPath.ForEach(vertex =>
+            {
+                int prevVertex = path.LastOrDefault();
+                if(AssocMatrix[vertex, prevVertex] != 0 || prevVertex == 0)
+                    path.Add(vertex);
+                else
+                {
+                    var reroute = PathMatrix[prevVertex, vertex].Vertices.Select(v=>v).ToList();
+                    reroute.RemoveAt(0);
+                    reroute.ForEach(v => path.Add(v));
+                }
+            });
+
+            return path;
+        }
+
+        public Graph CopyGraph()
+        {
+            var graph = new Graph();
+            graph.NumOfEdges = NumOfEdges;
+            graph.NumOfOddVertices = NumOfOddVertices;
+            graph.NumOfVertices = NumOfVertices;
+            graph.OddVertices = OddVertices.Select(v => v).ToList();
+            graph.AssocMatrix = (int[,])AssocMatrix.Clone();
+            graph.Data = (int[,])Data.Clone();
+            graph.Degrees = (int[])Degrees.Clone();
+            graph.PathMatrix = (Path[,])PathMatrix.Clone();
+
+            return graph;
+        }
     }
 }

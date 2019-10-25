@@ -37,6 +37,14 @@ namespace ChinskiListonosz
                     mutation);
             ga.Termination = termination;
             ga.Start();
+            var bestChromosome = ga.BestChromosome as CPChromosome;
+            var phenotype = bestChromosome.GetValues();
+            var lowestAug = bestChromosome.Fitness.GetValueOrDefault();
+
+            var augmentedGraph = Globals.graph.CopyGraph();
+            augmentedGraph.AddEdgesToGraph(phenotype);
+            var path = augmentedGraph.FindEulerianPath(1);
+            var realPath = Globals.graph.FindShortestPath(path);
 
         }
     }
