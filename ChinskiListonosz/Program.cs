@@ -18,8 +18,37 @@ namespace ChinskiListonosz
     {
         static void Main(string[] args)
         {
-            var graph = new Graph("Data/data.txt");
             
+            Globals.graph = new Graph("Data/data.txt");
+            int[] startValues = new int[Globals.graph.NumOfOddVertices];
+            startValues = Globals.graph.OddVertices.ToArray();
+
+            var chromosome = new CPChromosome (startValues.Length, startValues);
+            var population = new Population(50, 50, chromosome);
+            var fitness = new CPFitness();
+            var selection = new RouletteWheelSelection();
+            var crossover = new OnePointCrossover();
+            var mutation = new DisplacementMutation();
+            var termination = new FitnessStagnationTermination(30);
+            var ga = new GeneticAlgorithm(
+                    population,
+                    fitness,
+                    selection,
+                    crossover,
+                    mutation);
+            ga.Termination = termination;
+            ga.Start();
+            var bestChromosome = ga.BestChromosome as CPChromosome;
+            var phenotype = bestChromosome.GetValues();
+            var lowestAug = bestChromosome.Fitness.GetValueOrDefault();
+            
+            Globals.graph.AddEdgesToGraph(phenotype);
+            var eulerianPath = Globals.graph.FindEulerianPath(1);
+            var shortestPath = Globals.graph.FindShortesPath(eulerianPath);
+            var pathLength = Globals.graph.GetPathLength(shortestPath);
+            Console.WriteLine(Globals.graph.PathToString(shortestPath));
+            Console.WriteLine(pathLength);
+
         }
     }
 }

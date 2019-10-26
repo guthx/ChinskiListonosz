@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ChinskiListonosz
 {
-    class Path
+    public class Path
     {
         public int Distance;
         public List<int> Vertices;
