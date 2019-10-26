@@ -24,12 +24,12 @@ namespace ChinskiListonosz
             startValues = Globals.graph.OddVertices.ToArray();
 
             var chromosome = new CPChromosome (startValues.Length, startValues);
-            var population = new Population(50, 50, chromosome);
+            var population = new Population(100, 100, chromosome);
             var fitness = new CPFitness();
             var selection = new RouletteWheelSelection();
             var crossover = new OnePointCrossover();
             var mutation = new DisplacementMutation();
-            var termination = new FitnessStagnationTermination(30);
+            var termination = new FitnessStagnationTermination(50);
             var ga = new GeneticAlgorithm(
                     population,
                     fitness,
@@ -48,7 +48,10 @@ namespace ChinskiListonosz
             var pathLength = Globals.graph.GetPathLength(shortestPath);
             Console.WriteLine(Globals.graph.PathToString(shortestPath));
             Console.WriteLine(pathLength);
+            
 
+          
         }
+
     }
 }
