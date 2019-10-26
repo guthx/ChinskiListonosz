@@ -19,7 +19,7 @@ namespace ChinskiListonosz
         static void Main(string[] args)
         {
             
-            Globals.graph = new GraphNew("Data/data.txt");
+            Globals.graph = new Graph("Data/data.txt");
             int[] startValues = new int[Globals.graph.NumOfOddVertices];
             startValues = Globals.graph.OddVertices.ToArray();
 
@@ -42,12 +42,11 @@ namespace ChinskiListonosz
             var phenotype = bestChromosome.GetValues();
             var lowestAug = bestChromosome.Fitness.GetValueOrDefault();
             
-            var test = new GraphNew("Data/data.txt");
-            test.AddEdgesToGraph(phenotype);
-            var eulerianPath = test.FindEulerianPath(1);
-            var shortestPath = test.FindShortesPath(eulerianPath);
-            var pathLength = test.GetPathLength(shortestPath);
-            Console.WriteLine(test.PathToString(shortestPath));
+            Globals.graph.AddEdgesToGraph(phenotype);
+            var eulerianPath = Globals.graph.FindEulerianPath(1);
+            var shortestPath = Globals.graph.FindShortesPath(eulerianPath);
+            var pathLength = Globals.graph.GetPathLength(shortestPath);
+            Console.WriteLine(Globals.graph.PathToString(shortestPath));
             Console.WriteLine(pathLength);
 
         }

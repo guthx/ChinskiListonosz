@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 namespace ChinskiListonosz
 {
-    public class GraphNew
+    public class GraphOld
     {
         private static string Filename;
         // Specifies number of edges in the graph
@@ -18,7 +18,7 @@ namespace ChinskiListonosz
         public int[,] Data;
         // Contains association matrix for the graph
         // AssocMatrix[i, j] specifies the length of the path between vertices i and j, assuming the path exists (otherwise it's 0)
-        public List<Path>[,] AssocMatrix;
+        public int[,] AssocMatrix;
         // Contains degrees of each vertex of the graph, i.e. Degrees[i] is the degree of vertex i
         public int[] Degrees;
         // Contains a matrix that specifies the path and it's cost between each pair of odd vertices
@@ -28,7 +28,7 @@ namespace ChinskiListonosz
         // Contains number of edges between vertices
         public int[,] EdgesMatrix;
 
-        public GraphNew(string name)
+        public GraphOld(string name)
         {
             Filename = name;
 
@@ -40,8 +40,8 @@ namespace ChinskiListonosz
             CreatePathMatrix();
         }
 
-        public GraphNew() { }
-
+        public GraphOld() { }
+        
         // Function loads data from given file and puts it into the Data array
         private void LoadData()
         {
@@ -77,12 +77,15 @@ namespace ChinskiListonosz
             }
             */
             Degrees = Degrees.ToList().Select(v => 0).ToArray();
-            for (var i = 1; i < NumOfVertices + 1; i++)
-                for (var j = i + 1; j < NumOfVertices + 1; j++)
+            for(var i=1; i < NumOfVertices+1; i++)
+                for(var j=i+1; j<NumOfVertices+1; j++)
                 {
-                    Degrees[i] += AssocMatrix[i, j].Count();
-                    Degrees[j] += AssocMatrix[i, j].Count();
-
+                    if(AssocMatrix[i, j] != 0)
+                    {
+                        Degrees[i]++;
+                        Degrees[j]++;
+                    }
+                    
                 }
 
         }
@@ -99,24 +102,17 @@ namespace ChinskiListonosz
                     max = Data[i, 1];
             }
             NumOfVertices = max;
-            AssocMatrix = new List<Path>[NumOfVertices + 1, NumOfVertices + 1];
-            for (var i = 0; i < NumOfVertices + 1; i++)
-                for (var j = 0; j < NumOfVertices + 1; j++)
-                    AssocMatrix[i, j] = new List<Path>();
-            //   EdgesMatrix = new int[NumOfVertices + 1, NumOfVertices + 1];
+            AssocMatrix = new int[NumOfVertices + 1, NumOfVertices + 1];
+            EdgesMatrix = new int[NumOfVertices + 1, NumOfVertices + 1];
             for (var i = 0; i < NumOfEdges; i++)
             {
                 int start = Data[i, 0];
                 int end = Data[i, 1];
                 int weight = Data[i, 2];
-                var l1 = new List<int> { end };
-                var l2 = new List<int> { start };
-                AssocMatrix[start, end].Add(new Path(weight, l1));
-                AssocMatrix[end, start].Add(new Path(weight, l2));
-                AssocMatrix[start, end] = AssocMatrix[start, end].OrderBy(p => p.Distance).ToList();
-                AssocMatrix[end, start] = AssocMatrix[end, start].OrderBy(p => p.Distance).ToList();
-                //      EdgesMatrix[start, end]++;
-                //      EdgesMatrix[end, start]++;
+                AssocMatrix[start, end] = weight;
+                AssocMatrix[end, start] = weight;
+                EdgesMatrix[start, end]++;
+                EdgesMatrix[end, start]++;
             }
         }
 
@@ -133,7 +129,7 @@ namespace ChinskiListonosz
             }
             NumOfOddVertices = OddVertices.Count();
         }
-
+        
         // Function creates the Path matrix using Dijskstra's algorithm and puts it into PathMatrix array
         private void CreatePathMatrix()
         {
@@ -164,9 +160,9 @@ namespace ChinskiListonosz
 
                     Q.ForEach(vertex =>
                     {
-                        if (AssocMatrix[vertex, minDistV].Count > 0)
+                        if (AssocMatrix[vertex, minDistV] > 0)
                         {
-                            int alt = dist[minDistV] + AssocMatrix[vertex, minDistV].First().Distance;
+                            int alt = dist[minDistV] + AssocMatrix[vertex, minDistV];
                             if (alt < dist[vertex])
                             {
                                 dist[vertex] = alt;
@@ -189,28 +185,27 @@ namespace ChinskiListonosz
                             target = prev[target];
                         }
                         var path = new Path(distance, vertices);
-                        path.Vertices.RemoveAt(0);
                         PathMatrix[start, source] = path;
                     }
 
                 });
             });
         }
-        
+
         public void AddEdgesToGraph(int[] vertices)
         {
-            for (var i = 0; i < vertices.Length; i += 2)
+            for(var i = 0; i<vertices.Length; i+=2)
             {
                 int v1 = vertices[i];
                 int v2 = vertices[i + 1];
-                AssocMatrix[v2, v1].Add(PathMatrix[v2, v1]);
-                AssocMatrix[v1, v2].Add(PathMatrix[v1, v2]);
+                AssocMatrix[v1, v2] = PathMatrix[v1, v2].Distance;
+                AssocMatrix[v2, v1] = PathMatrix[v1, v2].Distance;
                 Degrees[v1]++;
                 Degrees[v2]++;
-              //  EdgesMatrix[v1, v2]++;
-              //  EdgesMatrix[v2, v1]++;
+                EdgesMatrix[v1, v2]++;
+                EdgesMatrix[v2, v1]++;
             }
-            // CalculateDegrees();
+           // CalculateDegrees();
         }
 
         private bool IsGraphEulerian()
@@ -226,33 +221,27 @@ namespace ChinskiListonosz
         {
             if (!IsGraphEulerian())
                 throw new Exception("Graf nie jest eulerowski");
-            
             var stack = new Stack<int>();
             var path = new List<int>();
             int currentVertex = startingVertex;
             int[] degrees = (int[])Degrees.Clone();
-            int[,] count = new int[NumOfVertices + 1, NumOfVertices + 1];
-            for (var i = 0; i < NumOfVertices + 1; i++)
-                for (var j = 0; j < NumOfVertices + 1; j++)
-                    count[i, j] = AssocMatrix[i, j].Count;
-           // int[,] edgesMatrix = (int[,])EdgesMatrix.Clone();
+            int[,] edgesMatrix = (int[,])EdgesMatrix.Clone();
 
-            while (stack.Count > 0 || degrees[currentVertex] > 0)
+            while(stack.Count > 0 || degrees[currentVertex] > 0)
             {
-                if (degrees[currentVertex] == 0)
+                if(degrees[currentVertex] == 0)
                 {
                     path.Add(currentVertex);
                     currentVertex = stack.Pop();
-                }
-                else
+                } else
                 {
                     stack.Push(currentVertex);
-                    for (var i = 1; i < NumOfVertices + 1; i++)
+                    for(var i=1; i<NumOfVertices+1; i++)
                     {
-                        if (count[i, currentVertex] != 0)
+                        if(edgesMatrix[i, currentVertex] != 0)
                         {
-                            count[i, currentVertex]--;
-                            count[currentVertex, i]--;
+                            edgesMatrix[i, currentVertex]--;
+                            edgesMatrix[currentVertex, i]--;
                             degrees[i]--;
                             degrees[currentVertex]--;
                             currentVertex = i;
@@ -262,81 +251,10 @@ namespace ChinskiListonosz
                 }
             }
             path.Add(startingVertex);
-            //  path.Reverse();
+          //  path.Reverse();
             return path;
-            /*
-            var path = new List<Path>();
-            int currentVertex = startingVertex;
-            bool pathNotDone = true;
-            int bestPath;
-            int maxDegree = 0;
-            while (pathNotDone)
-            {
-                maxDegree = 0;
-                bestPath = 0;
-                for (var i=0; i<NumOfVertices+1; i++)
-                {
-                    if(AssocMatrix[currentVertex, i].Count > 0)
-                    {
-                        if(Degrees[i] > maxDegree)
-                        {
-                            maxDegree = Degrees[i];
-                            bestPath = i;
-                        }
-                            
-                    }               
-                }
-                if (maxDegree == 0)
-                    break;
-                else
-                {
-                    path.Add(AssocMatrix[currentVertex, bestPath].First());
-                    AssocMatrix[currentVertex, bestPath].RemoveAt(0);
-                    AssocMatrix[bestPath, currentVertex].RemoveAt(0);
-                    Degrees[currentVertex]--;
-                    Degrees[bestPath]--;
-                    currentVertex = bestPath;
-                }
-            }
-            return path;
-            */
         }
 
-        public string PathToString(List<Path> path)
-        {
-            var pathString = new string("");
-            path.ForEach(p =>
-            {
-                p.Vertices.ForEach(v => pathString = string.Concat(pathString, v.ToString()));
-            });
-
-            return pathString;
-        }
-
-        public List<Path> FindShortesPath(List<int> eulerPath)
-        {
-            var shortestPath = new List<Path>();
-            var pathArray = eulerPath.ToArray();
-            for(var i=0; i<pathArray.Length-1; i++)
-            {
-                int v1 = pathArray[i];
-                int v2 = pathArray[i + 1];
-                var path = AssocMatrix[v1, v2].First();
-                AssocMatrix[v1, v2].RemoveAt(0);
-                AssocMatrix[v2, v1].RemoveAt(0);
-                shortestPath.Add(path);
-            }
-
-            return shortestPath;
-        }
-
-        public int GetPathLength(List<Path> path)
-        {
-            int length=0;
-            path.ForEach(p => length += p.Distance);
-            return length;
-        }
-        /*
         public List<int> FindShortestPath(List<int> eulerianPath)
         {
             var path = new List<int>();
@@ -344,18 +262,17 @@ namespace ChinskiListonosz
             eulerianPath.ForEach(vertex =>
             {
                 int prevVertex = path.LastOrDefault();
-                if (AssocMatrix[vertex, prevVertex] != 0 || prevVertex == 0)
-                    if (PathMatrix[prevVertex, vertex] != null && PathMatrix[prevVertex, vertex].Distance < AssocMatrix[vertex, prevVertex])
+                if(AssocMatrix[vertex, prevVertex] != 0 || prevVertex == 0)
+                    if(PathMatrix[prevVertex, vertex] != null && PathMatrix[prevVertex, vertex].Distance < AssocMatrix[vertex, prevVertex])
                     {
                         var reroute = PathMatrix[prevVertex, vertex].Vertices.Select(v => v).ToList();
                         reroute.RemoveAt(0);
                         reroute.ForEach(v => path.Add(v));
-                    }
-                    else
+                    } else
                         path.Add(vertex);
                 else
                 {
-                    var reroute = PathMatrix[prevVertex, vertex].Vertices.Select(v => v).ToList();
+                    var reroute = PathMatrix[prevVertex, vertex].Vertices.Select(v=>v).ToList();
                     reroute.RemoveAt(0);
                     reroute.ForEach(v => path.Add(v));
                 }
@@ -363,10 +280,10 @@ namespace ChinskiListonosz
 
             return path;
         }
-        
-        public GraphNew CopyGraphNew()
+
+        public GraphOld CopyGraph()
         {
-            var graph = new GraphNew();
+            var graph = new GraphOld();
             graph.NumOfEdges = NumOfEdges;
             graph.NumOfOddVertices = NumOfOddVertices;
             graph.NumOfVertices = NumOfVertices;
@@ -378,6 +295,6 @@ namespace ChinskiListonosz
             graph.EdgesMatrix = (int[,])EdgesMatrix.Clone();
 
             return graph;
-        }*/
+        }
     }
 }

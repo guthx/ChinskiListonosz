@@ -6,6 +6,6 @@ namespace ChinskiListonosz
 {
     public static class Globals
     {
-        public static GraphNew graph;
+        public static Graph graph;
     }
 }
