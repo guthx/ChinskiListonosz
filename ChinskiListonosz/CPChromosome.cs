@@ -13,6 +13,9 @@ namespace ChinskiListonosz
         private readonly int[] m_geneValues;
         private readonly int m_length;
         private readonly int m_startIndex;
+        private readonly int m_populationSize;
+        private float m_fIndex;
+        private float m_step;
 
         private int Factorial(int n)
         {
@@ -89,17 +92,22 @@ namespace ChinskiListonosz
             }
             return geneValues;
         }
-        public CPChromosome(int length, int[] geneValues, int startIndex = 0) : base(length)
+        public CPChromosome(int length, int[] geneValues, int populationSize, int startIndex = 0, float fIndex = 0) : base(length)
         {
             m_length = length;
             m_startIndex = startIndex;
+            m_populationSize = populationSize;
+            m_fIndex = fIndex;
+            m_step = m_length / m_populationSize;
             m_geneValues = (int[])SetGenes(geneValues).Clone();
             CreateGenes();
         }
 
         public override IChromosome CreateNew()
         {
-            return new CPChromosome(m_length, m_geneValues, (m_startIndex+1)%Factorial(m_length));
+            m_fIndex += m_step;
+            int startIndex = ((int)Math.Round(m_fIndex))%Factorial(m_length);
+            return new CPChromosome(m_length, m_geneValues, m_populationSize, startIndex, m_fIndex);
         }
 
         public override Gene GenerateGene(int geneIndex)

@@ -22,9 +22,9 @@ namespace ChinskiListonosz
             Globals.graph = new Graph("Data/data.txt");
             int[] startValues = new int[Globals.graph.NumOfOddVertices];
             startValues = Globals.graph.OddVertices.ToArray();
-
-            var chromosome = new CPChromosome (startValues.Length, startValues);
-            var population = new Population(100, 100, chromosome);
+            int populationSize = 10;
+            var chromosome = new CPChromosome (startValues.Length, startValues, populationSize);
+            var population = new Population(populationSize, populationSize, chromosome);
             var fitness = new CPFitness();
             var selection = new RouletteWheelSelection();
             var crossover = new OnePointCrossover();
