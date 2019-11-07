@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
+
 namespace ChinskiListonosz
 {
     public class Graph
@@ -54,7 +56,13 @@ namespace ChinskiListonosz
             while (!reader.EndOfStream)
             {
                 var line = reader.ReadLine();
-                var values = line.Split(' ');
+                string pattern = "<[0-9]+>";
+                StringBuilder valuesBuilder = new StringBuilder();
+                foreach (Match match in Regex.Matches(line, pattern))
+                    valuesBuilder.Append(match.Value.Trim('<').Replace('>', ' '));
+                var valuesString = valuesBuilder.ToString().Trim(' ');
+                var values = valuesString.Split(' ');
+                
                 int k;
                 for (k = 0; k < values.Length; k++)
                 {
