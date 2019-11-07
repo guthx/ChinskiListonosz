@@ -58,6 +58,10 @@ namespace ChinskiListonosz
                 var line = reader.ReadLine();
                 string pattern = "<[0-9]+>";
                 StringBuilder valuesBuilder = new StringBuilder();
+                if (Regex.Matches(line, pattern).Count != 3)
+                {
+                    throw new Exception("Niepoprawny format danych");
+                }
                 foreach (Match match in Regex.Matches(line, pattern))
                     valuesBuilder.Append(match.Value.Trim('<').Replace('>', ' '));
                 var valuesString = valuesBuilder.ToString().Trim(' ');
