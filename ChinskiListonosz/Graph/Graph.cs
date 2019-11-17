@@ -48,25 +48,50 @@ namespace ChinskiListonosz
         // Function loads data from given file and puts it into the Data array
         private void LoadData()
         {
+            int dataFormat=0;
             var reader = new StreamReader(@Filename);
             var lineCount = File.ReadLines(@Filename).Count();
             int i = 0;
             Data = new int[lineCount, 3];
             NumOfEdges = lineCount;
+            if (reader.Peek() == '<')
+                dataFormat = 1;
+            else if (Regex.IsMatch(reader.Peek().ToString(), "[0-9]"))
+                dataFormat = 2;
+            else throw new Exception("Niepoprawny format danych");
+
             while (!reader.EndOfStream)
             {
                 var line = reader.ReadLine();
-                string pattern = "<[0-9]+>";
-                StringBuilder valuesBuilder = new StringBuilder();
-                foreach (Match match in Regex.Matches(line, pattern))
-                    valuesBuilder.Append(match.Value.Trim('<').Replace('>', ' '));
-                var valuesString = valuesBuilder.ToString().Trim(' ');
-                var values = valuesString.Split(' ');
-                
-                int k;
-                for (k = 0; k < values.Length; k++)
+
+                if(dataFormat == 2)
                 {
-                    Data[i, k] = int.Parse(values[k]);
+                    var values = line.Split(' ');
+                    if(values.Length != 3)
+                    {
+                        throw new Exception("Niepoprawny format danych");
+                    }
+                    for(var k = 0; k < values.Length; k++)
+                    {
+                        Data[i, k] = int.Parse(values[k]);
+                    }
+                } 
+                else if (dataFormat == 1)
+                {
+                    string pattern = "<[0-9]+>";
+                    StringBuilder valuesBuilder = new StringBuilder();
+                    if (Regex.Matches(line, pattern).Count != 3)
+                    {
+                        throw new Exception("Niepoprawny format danych");
+                    }
+                    foreach (Match match in Regex.Matches(line, pattern))
+                        valuesBuilder.Append(match.Value.Trim('<').Replace('>', ' '));
+                    var valuesString = valuesBuilder.ToString().Trim(' ');
+                    var values = valuesString.Split(' ');
+                    for (var k = 0; k < values.Length; k++)
+                    {
+                        Data[i, k] = int.Parse(values[k]);
+                    }
                 }
                 i++;
             }
@@ -211,7 +236,7 @@ namespace ChinskiListonosz
         }
 
         // Checks if graph is Eulerian, i.e. every vertex's degree is even
-        private bool IsGraphEulerian()
+        public bool IsEulerian()
         {
             for (var i = 1; i < NumOfVertices + 1; i++)
                 if (Degrees[i] % 2 != 0)
@@ -223,7 +248,7 @@ namespace ChinskiListonosz
         // Function finds Eulerian path in the graph and returns it as a list of vertices
         public List<int> FindEulerianPath(int startingVertex)
         {
-            if (!IsGraphEulerian())
+            if (!IsEulerian())
                 throw new Exception("Graf nie jest eulerowski");
             
             var stack = new Stack<int>();
@@ -268,17 +293,21 @@ namespace ChinskiListonosz
         // Function transforms a path through the graph given as a list of subpaths to a string
         public string PathToString(List<Path> path)
         {
-            var pathString = new string("");
+            var pathString = new StringBuilder();
             path.ForEach(p =>
             {
-                p.Vertices.ForEach(v => pathString = string.Concat(pathString, v.ToString()));
+                p.Vertices.ForEach(v =>
+                {
+                    pathString.Append(v.ToString());
+                    pathString.Append('-');
+                });
             });
 
-            return pathString;
+            return pathString.ToString().Trim('-');
         }
 
         // Function changes a path given by a list of vertices to a list of subpaths
-        public List<Path> FindShortesPath(List<int> eulerPath)
+        public List<Path> FindShortestPath(List<int> eulerPath)
         {
             var shortestPath = new List<Path>();
             var pathArray = eulerPath.ToArray();

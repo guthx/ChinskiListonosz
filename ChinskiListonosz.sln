@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29326.143
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChinskiListonosz", "ChinskiListonosz\ChinskiListonosz.csproj", "{172BD3E3-BC02-45F4-A659-2A03F37A4C21}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp2", "..\ConsoleApp2\ConsoleApp2\ConsoleApp2.csproj", "{D08487F7-BBC7-46C9-AEE7-3DB9563AAEF2}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{172BD3E3-BC02-45F4-A659-2A03F37A4C21}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{172BD3E3-BC02-45F4-A659-2A03F37A4C21}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{172BD3E3-BC02-45F4-A659-2A03F37A4C21}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D08487F7-BBC7-46C9-AEE7-3DB9563AAEF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D08487F7-BBC7-46C9-AEE7-3DB9563AAEF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D08487F7-BBC7-46C9-AEE7-3DB9563AAEF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D08487F7-BBC7-46C9-AEE7-3DB9563AAEF2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
