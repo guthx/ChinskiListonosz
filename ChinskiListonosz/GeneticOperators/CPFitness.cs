@@ -20,7 +20,7 @@ namespace ChinskiListonosz
             {
                 int v1 = values[i];
                 int v2 = values[i + 1];
-                int pathLength = Globals.graph.PathMatrix[v1, v2].Distance;
+                int pathLength = CPSetup.Graph.PathMatrix[v1, v2].Distance;
 
                 graphAug += pathLength;
             }
