@@ -293,13 +293,17 @@ namespace ChinskiListonosz
         // Function transforms a path through the graph given as a list of subpaths to a string
         public string PathToString(List<Path> path)
         {
-            var pathString = new string("");
+            var pathString = new StringBuilder();
             path.ForEach(p =>
             {
-                p.Vertices.ForEach(v => pathString = string.Concat(pathString, v.ToString()));
+                p.Vertices.ForEach(v =>
+                {
+                    pathString.Append(v.ToString());
+                    pathString.Append('-');
+                });
             });
 
-            return pathString;
+            return pathString.ToString().Trim('-');
         }
 
         // Function changes a path given by a list of vertices to a list of subpaths
