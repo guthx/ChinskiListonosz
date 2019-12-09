@@ -11,12 +11,15 @@ using GeneticSharp.Domain.Crossovers;
 using GeneticSharp.Domain.Mutations;
 using GeneticSharp.Domain.Terminations;
 using GeneticSharp.Domain;
+using System.Globalization;
+
 namespace ChinskiListonosz
 {
     class Program
     {
         static void Main(string[] args)
         {
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             CPSetup setup = new CPSetup(100);
             setup.Run();
         }

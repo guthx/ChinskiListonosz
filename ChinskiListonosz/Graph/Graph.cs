@@ -312,13 +312,14 @@ namespace ChinskiListonosz
             var shortestPath = new List<Path>();
             var pathArray = eulerPath.ToArray();
             shortestPath.Add(new Path(0, new List<int> { pathArray[0] }));
+            List<Path>[,] assocMatrix = (List<Path>[,])AssocMatrix.Clone();
             for(var i=0; i<pathArray.Length-1; i++)
             {
                 int v1 = pathArray[i];
                 int v2 = pathArray[i + 1];
-                var path = AssocMatrix[v1, v2].First();
-                AssocMatrix[v1, v2].RemoveAt(0);
-                AssocMatrix[v2, v1].RemoveAt(0);
+                var path = assocMatrix[v1, v2].First();
+                assocMatrix[v1, v2].RemoveAt(0);
+                assocMatrix[v2, v1].RemoveAt(0);
                 shortestPath.Add(path);
             }
 
